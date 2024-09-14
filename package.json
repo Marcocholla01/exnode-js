@@ -1,0 +1,32 @@
+{
+  "name": "exnode-js",
+  "version": "1.0.0",
+  "description": "A Node.js terminal tool for spinning up Javascript & Typescript projects.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "jest"
+  },
+  "bin": {
+    "exnode": "./index.js"
+  },
+  "keywords": [
+    "CLI",
+    "Nodejs",
+    "Javascript",
+    "Typescript",
+    "Expressjs",
+    "Nextjs"
+  ],
+  "author": "PAUL OCHOLLA (Marcocholla01)",
+  "license": "MIT",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "commander": "^12.1.0",
+    "figlet": "^1.7.0",
+    "fs-extra": "^11.2.0",
+    "inquirer": "^10.2.2",
+    "ora": "^8.1.0",
+    "simple-git": "^3.26.0"
+  }
+}
