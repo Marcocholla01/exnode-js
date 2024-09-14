@@ -1,5 +1,5 @@
 {
-  "name": "exnode-js",
+  "name": "@marcocholla/exnode-js",
   "version": "1.0.0",
   "description": "A Node.js terminal tool for spinning up Javascript & Typescript projects.",
   "main": "index.js",

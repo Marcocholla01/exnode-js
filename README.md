@@ -1,6 +1,6 @@
-# exnode-js
+# @marcocholla/exnode-js
 
-`exnode-js` is a CLI tool to quickly scaffold a new Node.js application with a customizable setup.
+`@marcocholla/exnode-js` is a CLI tool to quickly scaffold a new Node.js application with a customizable setup.
 
 ## Features
 
@@ -8,12 +8,12 @@
 - Supports JavaScript and TypeScript templates
 - Initializes a Git repository and installs dependencies
 
-## Installation
+## Installation and Usage
 
-Install `exnode-js` globally using npm:
+Install `@marcocholla/exnode-js` globally using npm:
 
 ```bash
-npm install -g exnode-js
+npm install -g @marcocholla/exnode-js
 ```
 
 ## Usage
@@ -21,7 +21,15 @@ npm install -g exnode-js
 After installation, run the CLI command to create a new Node.js application:
 
 ```bash
-exnode-js app-name
+@marcocholla/exnode-js app-name
+```
+
+## OR using npx
+
+You can run `@marcocholla/exnode-js` from your terminal directlly without installing it globally
+
+```bash
+npx @marcocholla/exnode-js app-name
 ```
 
 Follow the prompts to select your preferred template and options.
