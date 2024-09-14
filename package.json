@@ -1,6 +1,6 @@
 {
-  "name": "@marcocholla/exnode-js",
-  "version": "1.0.0",
+  "name": "exnode-cli",
+  "version": "1.0.2",
   "description": "A Node.js terminal tool for spinning up Javascript & Typescript projects.",
   "main": "index.js",
   "type": "module",
@@ -8,7 +8,7 @@
     "test": "jest"
   },
   "bin": {
-    "exnode": "./index.js"
+    "exnode-cli": "./index.js"
   },
   "keywords": [
     "CLI",

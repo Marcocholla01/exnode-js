@@ -9,13 +9,15 @@ import ora from "ora";
 import inquirer from "inquirer";
 import { execSync } from "child_process";
 import figlet from "figlet";
+import { emptyNodejs } from "./templates/js-templates.js";
+import { emptyNodets } from "./templates/ts-templates.js";
 
 const program = new Command();
 
 // Function to display the terminal name
 function showTerminalInfo() {
   return new Promise((resolve) => {
-    figlet("exnode-js", function (err, data) {
+    figlet("exnode-cli", function (err, data) {
       if (err) {
         console.log(colors.red.italic("Something went wrong..."));
         console.dir(err);
@@ -23,6 +25,10 @@ function showTerminalInfo() {
       }
       console.log(colors.magenta(data));
       console.log(colors.cyan("Version:      ") + colors.yellow("1.0.0"));
+      console.log(
+        colors.cyan("Developer:    ") +
+          colors.yellow("PAUL OUMA OCHOLLA (@Marcocholla01)")
+      );
       console.log(
         colors.cyan("Description:  ") +
           colors.yellow(
@@ -71,7 +77,6 @@ function installPackageManager(packageManager) {
 async function main() {
   await showTerminalInfo();
   console.log("                                  ");
-  console.log("                                  ");
 
   // Ask the user if they wish to continue
   const { continueSetup } = await inquirer.prompt([
@@ -84,7 +89,8 @@ async function main() {
   ]);
 
   if (!continueSetup) {
-    console.log(colors.yellow("Thank you for using exnode-js!"));
+    console.log("                                  ");
+    console.log(colors.yellow("Thank you for using exnode-cli!"));
     process.exit(0);
   }
 
@@ -155,10 +161,7 @@ async function main() {
         },
       ]);
 
-      const repoUrl =
-        answers.language === "js"
-          ? "https://github.com/Marcocholla/node-js-starter-kit-javascript.git"
-          : "https://github.com/Marcocholla/node-js-starter-kit-typescript..git";
+      const repoUrl = answers.language === "js" ? emptyNodejs : emptyNodets;
 
       fs.mkdirSync(projectPath);
 
