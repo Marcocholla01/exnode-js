@@ -2,15 +2,44 @@
 
 import { Command } from "commander";
 import colors from "colors";
-import fs from "fs-extra";
-import path from "path";
 import { simpleGit } from "simple-git";
 import ora from "ora";
 import inquirer from "inquirer";
 import { execSync } from "child_process";
 import figlet from "figlet";
-import { emptyNodejs } from "./templates/js-templates.js";
-import { emptyNodets } from "./templates/ts-templates.js";
+import Table from "cli-table3"; // Import cli-table3
+import {
+  // emptyNodejs,
+  // emptyNextjs,
+  emptyNodejsMySQL,
+  emptyNodejsPostgres,
+  // emptyNodejsMongoDB,
+  emptyNodejsMySQLSequelize,
+  emptyNodejsPostgresSequelize,
+  emptyNodejsMongoDBMongoose,
+  emptyNextjsMySQL,
+  emptyNextjsPostgres,
+  // emptyNextjsMongoDB,
+  emptyNextjsMySQLSequelize,
+  emptyNextjsPostgresSequelize,
+  emptyNextjsMongoDBMongoose,
+} from "./templates/js-templates.js";
+import {
+  // emptyNodets,
+  // emptyNextts,
+  emptyNodetsMySQL,
+  emptyNodetsPostgres,
+  // emptyNodetsMongoDB,
+  emptyNodetsMySQLSequelize,
+  emptyNodetsPostgresSequelize,
+  emptyNodetsMongoDBMongoose,
+  emptyNexttsMySQL,
+  emptyNexttsPostgres,
+  // emptyNexttsMongoDB,
+  emptyNexttsMySQLSequelize,
+  emptyNexttsPostgresSequelize,
+  emptyNexttsMongoDBMongoose,
+} from "./templates/ts-templates.js";
 
 const program = new Command();
 
@@ -35,7 +64,6 @@ function showTerminalInfo() {
             "A Node.js terminal tool for spinning up Javascript & Typescript projects."
           )
       );
-
       console.log(
         colors.cyan("GitHub Repo: ") +
           colors.yellow(" https://github.com/marcocholla01/exnode-js")
@@ -73,133 +101,224 @@ function installPackageManager(packageManager) {
   }
 }
 
+// Function to dynamically ask questions based on the user's choices
+async function askQuestions() {
+  const questions = [
+    {
+      type: "list",
+      name: "language",
+      message: "Which language would you like to use?",
+      choices: [
+        { name: "TypeScript", value: "ts" },
+        { name: "JavaScript", value: "js" },
+      ],
+    },
+    {
+      type: "list",
+      name: "framework",
+      message: "Which framework would you like to use?",
+      choices: [
+        { name: "Node.js", value: "node" },
+        { name: "Next.js", value: "next" },
+      ],
+    },
+    {
+      type: "list",
+      name: "database",
+      message: "Which database would you like to use?",
+      choices: [
+        { name: "MySQL", value: "mysql" },
+        { name: "PostgreSQL", value: "postgresql" },
+        { name: "MongoDB", value: "mongodb" },
+      ],
+    },
+    {
+      type: "confirm",
+      name: "useOrm",
+      message: "Do you wish to use an ORM/ODM?",
+      when: (answers) => answers.database !== "mongodb", // Skip for MongoDB
+    },
+    {
+      type: "list",
+      name: "ormChoice",
+      message: "Which ORM would you like to use?",
+      choices: [
+        { name: "Prisma", value: "prisma" },
+        { name: "Sequelize", value: "sequelize" },
+      ],
+      when: (answers) => answers.useOrm && answers.database !== "mongodb",
+    },
+    {
+      type: "list",
+      name: "odmChoice",
+      message: "Which ODM would you like to use?",
+      choices: [{ name: "Mongoose", value: "mongoose" }],
+      when: (answers) => answers.database === "mongodb",
+    },
+    {
+      type: "list",
+      name: "packageManager",
+      message: "Which package manager would you like to use?",
+      choices: ["npm", "yarn", "pnpm"],
+    },
+  ];
+
+  const answers = await inquirer.prompt(questions);
+  return answers;
+}
+
 // Main function
 async function main() {
   await showTerminalInfo();
   console.log("                                  ");
 
-  // Ask the user if they wish to continue
-  const { continueSetup } = await inquirer.prompt([
-    {
-      type: "confirm",
-      name: "continueSetup",
-      message: "Do you wish to continue?",
-      default: true,
-    },
-  ]);
+  const answers = await askQuestions();
+  let projectTemplate;
 
-  if (!continueSetup) {
-    console.log("                                  ");
-    console.log(colors.yellow("Thank you for using exnode-cli!"));
-    process.exit(0);
-  }
-
-  // Ask for the preferred package manager
-  let packageManager;
-  while (!packageManager) {
-    const { selectedPackageManager } = await inquirer.prompt([
-      {
-        type: "list",
-        name: "selectedPackageManager",
-        message: "Which package manager would you like to use?",
-        choices: ["npm", "yarn", "pnpm"],
-        default: "npm",
-      },
-    ]);
-
-    // Check if the selected package manager is installed
-    if (isPackageManagerInstalled(selectedPackageManager)) {
-      packageManager = selectedPackageManager;
-    } else {
-      const { installPackage } = await inquirer.prompt([
-        {
-          type: "confirm",
-          name: "installPackage",
-          message: `${selectedPackageManager} is not installed. Do you wish to install it?`,
-          default: true,
-        },
-      ]);
-
-      if (installPackage) {
-        installPackageManager(selectedPackageManager);
-        packageManager = selectedPackageManager;
-      } else {
-        console.log(colors.yellow("Please select another package manager."));
-      }
+  // Select project template based on language, framework, database, ORM/ODM
+  if (answers.language === "js" && answers.framework === "node") {
+    if (answers.database === "mysql") {
+      projectTemplate = answers.useOrm
+        ? emptyNodejsMySQLSequelize
+        : emptyNodejsMySQL;
+    } else if (answers.database === "postgresql") {
+      projectTemplate = answers.useOrm
+        ? emptyNodejsPostgresSequelize
+        : emptyNodejsPostgres;
+    } else if (answers.database === "mongodb") {
+      projectTemplate = emptyNodejsMongoDBMongoose;
+    }
+  } else if (answers.language === "js" && answers.framework === "next") {
+    if (answers.database === "mysql") {
+      projectTemplate = answers.useOrm
+        ? emptyNextjsMySQLSequelize
+        : emptyNextjsMySQL;
+    } else if (answers.database === "postgresql") {
+      projectTemplate = answers.useOrm
+        ? emptyNextjsPostgresSequelize
+        : emptyNextjsPostgres;
+    } else if (answers.database === "mongodb") {
+      projectTemplate = emptyNextjsMongoDBMongoose;
+    }
+  } else if (answers.language === "ts" && answers.framework === "node") {
+    if (answers.database === "mysql") {
+      projectTemplate = answers.useOrm
+        ? emptyNodetsMySQLSequelize
+        : emptyNodetsMySQL;
+    } else if (answers.database === "postgresql") {
+      projectTemplate = answers.useOrm
+        ? emptyNodetsPostgresSequelize
+        : emptyNodetsPostgres;
+    } else if (answers.database === "mongodb") {
+      projectTemplate = emptyNodetsMongoDBMongoose;
+    }
+  } else if (answers.language === "ts" && answers.framework === "next") {
+    if (answers.database === "mysql") {
+      projectTemplate = answers.useOrm
+        ? emptyNexttsMySQLSequelize
+        : emptyNexttsMySQL;
+    } else if (answers.database === "postgresql") {
+      projectTemplate = answers.useOrm
+        ? emptyNexttsPostgresSequelize
+        : emptyNexttsPostgres;
+    } else if (answers.database === "mongodb") {
+      projectTemplate = emptyNexttsMongoDBMongoose;
     }
   }
 
-  // Continue with the project setup
-  program
-    .name("exnode-js")
-    .version("1.0.0")
-    .description(
-      "A Node.js terminal tool to set up JavaScript/TypeScript projects"
-    )
-    .argument("<project-name>", "name of the project")
-    .action(async (projectName) => {
-      const projectPath = path.join(process.cwd(), projectName);
-
-      if (fs.existsSync(projectPath)) {
-        console.error(
-          colors.red.italic(`Error: Directory ${projectName} already exists.`)
-        );
-        process.exit(1);
-      }
-
-      // Prompt for language selection
-      const answers = await inquirer.prompt([
-        {
-          type: "list",
-          name: "language",
-          message: "Which language would you like to use?",
-          choices: [
-            { name: "TypeScript", value: "ts" },
-            { name: "JavaScript", value: "js" },
-          ],
-          default: "ts",
-        },
-      ]);
-
-      const repoUrl = answers.language === "js" ? emptyNodejs : emptyNodets;
-
-      fs.mkdirSync(projectPath);
-
-      const spinner = ora(
-        `Downloading ${
-          answers.language === "js" ? "JavaScript" : "TypeScript"
-        } language...`
-      ).start();
-
-      const git = simpleGit();
-
-      try {
-        await git.clone(repoUrl, projectPath);
-        spinner.succeed(
-          `${
-            answers.language === "js" ? "JavaScript" : "TypeScript"
-          } language downloaded successfully!`
-        );
-
-        process.chdir(projectPath);
-
-        spinner.start("Installing dependencies...");
-        execSync(`${packageManager} install`, { stdio: "inherit" });
-        spinner.succeed("Dependencies installed successfully!");
-
-        console.log(colors.green(`Project ${projectName} is ready!`));
-        console.log(
-          colors.green(`cd ${projectName} and run ${packageManager} run dev`)
-        );
-      } catch (error) {
-        spinner.fail("Failed to set up the project.");
-        console.error(colors.red.italic(error.message));
-        process.exit(1);
-      }
+  // Check if the package manager is installed, else install
+  let packageManager = answers.packageManager;
+  while (!isPackageManagerInstalled(packageManager)) {
+    const { install } = await inquirer.prompt({
+      type: "confirm",
+      name: "install",
+      message: `${packageManager} is not installed. Do you want to install it?`,
     });
 
-  program.parse(process.argv);
+    if (install) {
+      installPackageManager(packageManager);
+    } else {
+      const { newPackageManager } = await inquirer.prompt({
+        type: "list",
+        name: "newPackageManager",
+        message: "Which package manager would you like to install?",
+        choices: ["npm", "yarn", "pnpm"],
+      });
+      packageManager = newPackageManager;
+    }
+  }
+
+  // Return this to use in the action handler
+  return {
+    projectTemplate,
+    packageManager,
+    answers,
+  };
 }
 
-// Start the main function
-main();
+program
+  .argument("[projectName]", "name of the project")
+  .action(async (projectName) => {
+    const { projectTemplate, packageManager, answers } = await main();
+
+    let projectPath = projectName || ".";
+    if (projectName === undefined) {
+      // Prompt for project name if not provided
+      const { projectNameInput } = await inquirer.prompt({
+        type: "input",
+        name: "projectNameInput",
+        message: "Enter the project name:",
+        default: "exnode-cli-project",
+      });
+      projectPath = projectNameInput;
+    }
+
+    const spinner = ora(
+      colors.cyan(`Creating project at ${projectPath}...`)
+    ).start();
+
+    // Initialize simple-git for cloning
+    const git = simpleGit();
+
+    try {
+      // Clone the template from the Git repository instead of creating a file
+      await git.clone(projectTemplate, projectPath);
+      spinner.succeed(
+        colors.green(`Project created successfully at ${projectPath}!`)
+      );
+
+      // Create and display the table
+      const table = new Table({
+        head: ["Language", "Framework", "Database", "ORM/ODM"],
+        colWidths: [15, 20, 15, 15],
+      });
+
+      table.push([
+        answers.language === "ts" ? "TypeScript" : "JavaScript",
+        answers.framework === "next" ? "Next.js" : "Node.js",
+        answers.database.charAt(0).toUpperCase() + answers.database.slice(1),
+        answers.database === "mongodb"
+          ? answers.odmChoice.charAt(0).toUpperCase() +
+            answers.odmChoice.slice(1)
+          : answers.ormChoice
+          ? answers.ormChoice.charAt(0).toUpperCase() +
+            answers.ormChoice.slice(1)
+          : "None",
+      ]);
+
+      console.log("\nProject Details:");
+      console.log(table.toString());
+      console.log(
+        colors.cyan(`Installing dependencies using ${packageManager}...`)
+      );
+      execSync(`${packageManager} install`, {
+        cwd: projectPath,
+        stdio: "inherit",
+      });
+      console.log(colors.green(`Dependencies installed successfully!`));
+    } catch (error) {
+      spinner.fail(colors.red(`Failed to create project: ${error.message}`));
+    }
+  });
+
+program.parse(process.argv);
